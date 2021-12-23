@@ -1,4 +1,5 @@
-import { StyleSheet, View, Text, Image } from 'react-native';
+import { useRef, useEffect } from 'react';
+import { StyleSheet, Animated, View, Text, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StarIcon } from './StarIcon';
 import { DoubleContainer } from './DoubleContainer';
@@ -12,10 +13,37 @@ export type BadgeComponentProps = {
 };
 
 export function BadgeComponent(props: BadgeComponentProps) {
+    const fade = [
+        useRef(new Animated.Value(0)).current,
+        useRef(new Animated.Value(0)).current,
+        useRef(new Animated.Value(0)).current,
+        useRef(new Animated.Value(0)).current,
+        useRef(new Animated.Value(0)).current,
+        useRef(new Animated.Value(0)).current
+    ];
 
-    let stars = []
+    const fadeIn = () => {
+        for (let i = 0; i < fade.length; i++) {
+            const DELTA = 100
+            fade[i].setValue(0);
+            Animated.timing(fade[i], {
+                toValue: 1,
+                duration: 1000-(i*DELTA),
+                useNativeDriver: true,
+                delay: i*DELTA
+            }).start();
+        }
+    };
+
+    useEffect(() => {
+        fadeIn()
+    }, []);
+
+    const TRANSLATE_DIST = 15
+
+    let stars = [];
     for (let i = 0; i < props.stars; i++)
-        stars.push(<StarIcon key={i} size={35} stroke="#ee9afc" color="#03ffcc" strokeWidth={45} />)
+        stars.push(<StarIcon key={i} size={35} stroke="#ee9afc" color="#03ffcc" strokeWidth={45} />);
 
     return (
         <View style={ styles.container }>
@@ -39,29 +67,89 @@ export function BadgeComponent(props: BadgeComponentProps) {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
             />
-            <View style={ styles.iconContainer }>
+            <Animated.View style={{
+                ...styles.iconContainer,
+                opacity: fade[0],
+                transform: [{
+                    translateY: fade[0].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [TRANSLATE_DIST, 0]
+                    })
+                }]
+            }}>
                 <Image style={ styles.icon } source={require("../assets/waifu.png")} />
                 <View style={ styles.elementColor } />
-            </View>
-            <View style={ styles.starContainer }>
-                { stars }
+                <View style={ styles.starContainer }>
+                    { stars }
+                </View>
+            </Animated.View>
+            <View style={ styles.subcontainer }>
+                <Animated.View style={{
+                    flex: 3,
+                    opacity: fade[3],
+                    transform: [{
+                        translateY: fade[3].interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [TRANSLATE_DIST, 0]
+                        })
+                    }]
+                }}>
+                    <Text style={{ ...styles.text }}>Lorem ipsum</Text>
+                </Animated.View>
+                <Animated.View style={{
+                    flex: 4,
+                    opacity: fade[2],
+                    transform: [{
+                        translateY: fade[2].interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [TRANSLATE_DIST, 0]
+                        })
+                    }]
+                }}>
+                    <DoubleContainer
+                        leftText="Fire"
+                        rightText="Autumn"
+                        leftColor="#fa8c73"
+                        rightColor="#fedbd7"
+                    />
+                </Animated.View>
             </View>
             <View style={ styles.subcontainer }>
-                <Text style={{ ...styles.text, flex: 3 }}>Lorem ipsum</Text>
-                <DoubleContainer
-                    style={{ flex: 4 }}
-                    leftText="Fire"
-                    rightText="Autumn"
-                    leftColor="#fa8c73"
-                    rightColor="#fedbd7"
-                />
+                <Animated.View style={{
+                    opacity: fade[5],
+                    transform: [{
+                        translateY: fade[5].interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [TRANSLATE_DIST, 0]
+                        })
+                    }]
+                }}>
+                    <SquareContainer color="#666">Consectetur</SquareContainer>
+                </Animated.View>
+                <Animated.View style={{
+                    opacity: fade[4],
+                    transform: [{
+                        translateY: fade[4].interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [TRANSLATE_DIST, 0]
+                        })
+                    }]
+                }}>
+                    <SquareContainer color="#000">Adipiscing</SquareContainer>
+                </Animated.View>
             </View>
-            <View style={ styles.subcontainer }>
-                <SquareContainer color="#666">Consectetur</SquareContainer>
-                <SquareContainer color="#000">Adipiscing</SquareContainer>
-            </View>
-            <Text style={ styles.name }>{ props.name }</Text>
-            <Text style={ styles.title }>{ props.title }</Text>
+            <Animated.View style={{
+                opacity: fade[1],
+                transform: [{
+                    translateY: fade[1].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [TRANSLATE_DIST, 0]
+                    })
+                }]
+            }}>
+                <Text style={ styles.name }>{ props.name }</Text>
+                <Text style={ styles.title }>{ props.title }</Text>
+            </Animated.View>
         </View>
     );
 }
@@ -88,6 +176,7 @@ const styles = StyleSheet.create({
     },
     iconContainer: {
         padding: 4,
+        marginBottom: 32,
         borderRadius: 35,
         backgroundColor: '#ee9afc'
     },
@@ -110,9 +199,12 @@ const styles = StyleSheet.create({
         borderColor: '#03ffcc'
     },
     starContainer: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: -10,
         flexDirection: 'row',
-        marginTop: -28,
-        marginBottom: 20
+        justifyContent: 'center'
     },
     subcontainer: {
         width: 250,
@@ -124,10 +216,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     name: {
+        textAlign: 'center',
         fontSize: 32,
         fontWeight: 'bold'
     },
     title: {
+        textAlign: 'center',
         fontSize: 18,
         fontWeight: 'bold'
     }
