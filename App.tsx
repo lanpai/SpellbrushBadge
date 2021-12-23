@@ -1,11 +1,12 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BadgeComponent } from './src/BadgeComponent';
 
 export default function App() {
     return (
-        <View style={styles.container}>
-            <BadgeComponent name="Name" title="Title" stars={6} imageUri="" />
-        </View>
+        <GestureHandlerRootView style={styles.container}>
+                <BadgeComponent name="Name" title="Title" stars={6} imageUri="" />
+        </GestureHandlerRootView>
     );
 }
 
