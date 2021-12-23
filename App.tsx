@@ -5,7 +5,7 @@ import { BadgeComponent } from './src/BadgeComponent';
 export default function App() {
     return (
         <GestureHandlerRootView style={styles.container}>
-                <BadgeComponent name="Name" title="Title" stars={6} imageUri="" />
+            <BadgeComponent name="Waifu" title="Laifu" stars={6} imageUri="" />
         </GestureHandlerRootView>
     );
 }

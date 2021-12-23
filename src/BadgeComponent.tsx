@@ -1,10 +1,10 @@
 import { useRef, useEffect } from 'react';
-import { StyleSheet, Animated, View, Text, Image } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { StyleSheet, Animated, Easing, View, Text, Image } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { StarIcon } from './StarIcon';
 import { DoubleContainer } from './DoubleContainer';
 import { SquareContainer } from './SquareContainer';
+import { LinearBand } from './LinearBand';
 
 export type BadgeComponentProps = {
     name: string;
@@ -22,9 +22,13 @@ export function BadgeComponent(props: BadgeComponentProps) {
         useRef(new Animated.Value(0)).current,
         useRef(new Animated.Value(0)).current
     ];
-    const rotateY = useRef(new Animated.Value(90)).current;
+    const rotation = useRef(new Animated.ValueXY({ x: 90, y: 0 })).current;
+    const sheen = useRef(new Animated.Value(0)).current;
 
-    const ROTATE_DURATION = 1000
+    const ROTATE_DURATION = 600
+    const ROTATE_X_COEFF = 0.8
+    const ROTATE_Y_COEFF = 0.3
+    const TRANSLATE_DIST = 20
 
     const fadeIn = () => {
         for (let i = 0; i < fade.length; i++) {
@@ -32,40 +36,66 @@ export function BadgeComponent(props: BadgeComponentProps) {
             fade[i].setValue(0);
             Animated.timing(fade[i], {
                 toValue: 1,
-                duration: 1000-(i*DELTA),
+                duration: 800-(i*DELTA),
+                easing: Easing.elastic(1),
                 useNativeDriver: true,
-                delay: ROTATE_DURATION+i*DELTA
+                delay: ROTATE_DURATION+i*DELTA-200
             }).start();
         }
     };
 
-    const rotate = (toValue: number, duration: number = ROTATE_DURATION) => {
-        Animated.timing(rotateY, {
+    const rotate = (
+        value: Animated.ValueXY,
+        toValue: any,
+        duration: number = ROTATE_DURATION
+    ) => {
+        Animated.timing(value, {
             toValue,
             duration,
+            easing: Easing.out(Easing.quad),
             useNativeDriver: true
         }).start();
     };
 
-    useEffect(() => {
+    const sheenIn = () => {
+        sheen.setValue(0);
+        Animated.timing(sheen, {
+            toValue: 1,
+            duration: 1200,
+            useNativeDriver: true
+        }).start();
+    };
+
+    const animIn = () => {
         fadeIn();
-        rotate(0);
+        sheenIn();
+        rotate(rotation, { x: 0, y: 0 });
+    };
+
+    useEffect(() => {
+        animIn();
     }, []);
 
-    const gesture = Gesture.Pan()
+    const panGesture = Gesture.Pan()
         .onUpdate((e) => {
-            console.log(e);
-            rotate(
-                Math.sign(e.translationX)
-                *(((Math.abs(e.translationX)+90)%180)-90),
-                0
-            );
+            const x = Math.sign(e.translationX)*(((Math.abs(ROTATE_X_COEFF*e.translationX)+90)%180)-90);
+            const shouldFlip = Math.floor((Math.abs(ROTATE_X_COEFF*e.translationX)+90) / 180)%2 ? 1 : -1;
+            const y = shouldFlip*Math.sign(e.translationY)*Math.sqrt(Math.abs(ROTATE_Y_COEFF*e.translationY));
+            rotate(rotation, { x, y }, 0);
         })
         .onEnd(() => {
-            rotate(0);
+            rotate(rotation, { x: 0, y: 0 });
+            sheenIn();
         });
 
-    const TRANSLATE_DIST = 15
+    const tapGesture = Gesture.Tap()
+        .numberOfTaps(2)
+        .onEnd(() => {
+            rotation.setValue({ x: 90, y: 0 });
+            animIn();
+        });
+
+    const gesture = Gesture.Race(panGesture, tapGesture);
 
     let stars = [];
     for (let i = 0; i < props.stars; i++)
@@ -75,33 +105,44 @@ export function BadgeComponent(props: BadgeComponentProps) {
         <GestureDetector gesture={gesture}>
             <Animated.View style={{
                 ...styles.container,
-                transform: [{
-                    rotateY: rotateY.interpolate({
-                        inputRange: [-90, 90],
-                        outputRange: ['-90deg', '90deg']
-                    })
-                }]
+                transform: [
+                    {
+                        rotateY: rotation.x.interpolate({
+                            inputRange: [-90, 90],
+                            outputRange: ['-90deg', '90deg']
+                        })
+                    },
+                    {
+                        rotateX: rotation.y.interpolate({
+                            inputRange: [-90, 90],
+                            outputRange: ['-90deg', '90deg']
+                        })
+                    }
+                ]
             }}>
-                <LinearGradient
-                    style={ styles.background }
-                    colors={[
-                        '#03ffcc',
-                        '#fff0', '#fff0',
-                        '#cbf7e8', '#cbf7e8',
-                        '#fff0', '#fff0',
-                        '#ee9afc', '#ee9afc',
-                        '#fff0'
-                    ]}
-                    locations={[
-                        0.2, 0.2,
-                        0.22, 0.22,
-                        0.27, 0.27,
-                        0.28, 0.28,
-                        0.285, 0.285
-                    ]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                />
+                <Animated.View
+                    style={{
+                        ...styles.background,
+                        zIndex: 5,
+                        opacity: sheen.interpolate({
+                            inputRange: [0, 0.5, 1],
+                            outputRange: [0, 1, 0]
+                        }),
+                        transform: [{
+                            translateY: sheen.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [-90, 90]
+                            })
+                        }]
+                    }}
+                >
+                    <LinearBand color='#f5f5ff85' start={0.45} width={0.025} blur={0.05} />
+                </Animated.View>
+                <Animated.View style={{ ...styles.background, opacity: fade[0] }}>
+                    <LinearBand style={{ borderRadius: 30 }} color='#03ffcc' start={0} width={0.2} />
+                    <LinearBand style={{ borderRadius: 30 }} color='#cbf7e8' start={0.22} width={0.05} />
+                    <LinearBand style={{ borderRadius: 30 }} color='#ee9afc' start={0.28} width={0.005} />
+                </Animated.View>
                 <Animated.View style={{
                     ...styles.iconContainer,
                     opacity: fade[0],
@@ -112,14 +153,57 @@ export function BadgeComponent(props: BadgeComponentProps) {
                         })
                     }]
                 }}>
-                    <Image style={ styles.icon } source={require("../assets/waifu.png")} />
-                    <View style={ styles.elementColor } />
-                    <View style={ styles.starContainer }>
-                        { stars }
+                    <View style={ styles.parallaxContainer }>
+                        <Animated.View style={{
+                            transform: [
+                                {
+                                    translateX: rotation.x.interpolate({
+                                        inputRange: [-90, 90],
+                                        outputRange: [200, -200]
+                                    })
+                                },
+                                {
+                                    translateY: rotation.y.interpolate({
+                                        inputRange: [-90, 90],
+                                        outputRange: [-200, 200]
+                                    })
+                                }
+                            ]
+                        }}>
+                            <Image style={ styles.icon } source={require("../assets/waifu.png")} />
+                        </Animated.View>
                     </View>
+                    <Animated.View
+                        style={{
+                            position: 'absolute',
+                            width: 258,
+                            height: 258,
+                            zIndex: 2,
+                            transform: [
+                                {
+                                    translateX: rotation.x.interpolate({
+                                        inputRange: [-90, 90],
+                                        outputRange: [-80, 80]
+                                    })
+                                },
+                                {
+                                    translateY: rotation.y.interpolate({
+                                        inputRange: [-90, 90],
+                                        outputRange: [80, -80]
+                                    })
+                                }
+                            ]
+                        }}
+                    >
+                        <View style={ styles.elementColor } />
+                        <View style={ styles.starContainer }>
+                            { stars }
+                        </View>
+                    </Animated.View>
                 </Animated.View>
                 <View style={ styles.subcontainer }>
-                    <Animated.View style={{
+                    <Animated.Text style={{
+                        ...styles.text,
                         flex: 3,
                         opacity: fade[3],
                         transform: [{
@@ -129,8 +213,8 @@ export function BadgeComponent(props: BadgeComponentProps) {
                             })
                         }]
                     }}>
-                        <Text style={{ ...styles.text }}>Lorem ipsum</Text>
-                    </Animated.View>
+                        Lorem ipsum
+                    </Animated.Text>
                     <Animated.View style={{
                         flex: 4,
                         opacity: fade[2],
@@ -208,13 +292,22 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
         left: 0,
-        borderRadius: 30,
+        overflow: 'hidden'
     },
     iconContainer: {
         padding: 4,
         marginBottom: 32,
         borderRadius: 35,
         backgroundColor: '#ee9afc'
+    },
+    parallaxContainer: {
+        height: 250,
+        aspectRatio: 1,
+        overflow: 'hidden',
+        borderRadius: 31,
+        borderWidth: 4,
+        borderColor: '#03ffcc',
+        backgroundColor: '#fff'
     },
     elementColor: {
         position: 'absolute',
@@ -228,11 +321,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#fa8c73'
     },
     icon: {
-        height: 250,
+        height: 286,
         aspectRatio: 1,
-        borderRadius: 31,
-        borderWidth: 4,
-        borderColor: '#03ffcc'
+        top: -20,
+        left: -20,
     },
     starContainer: {
         position: 'absolute',
