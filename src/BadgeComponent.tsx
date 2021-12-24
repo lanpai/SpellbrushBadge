@@ -6,6 +6,15 @@ import { DoubleContainer } from "./DoubleContainer";
 import { SquareContainer } from "./SquareContainer";
 import { LinearBand } from "./LinearBand";
 
+const ROTATE_DURATION = 700
+const ROTATE_X_COEFF = 0.8
+const ROTATE_Y_COEFF = 0.3
+const VELOCITY_X_COEFF = 0.00003
+const DECELERATION_X = 0.995
+const TRANSLATE_DIST = 20
+const FADE_DURATION = 800
+const FADE_STAGGER = 100
+
 export type BadgeComponentProps = {
     name: string;
     title: string;
@@ -25,51 +34,43 @@ export function BadgeComponent(props: BadgeComponentProps) {
     const rotation = useRef(new Animated.ValueXY({ x: 90, y: 0 })).current;
     const sheen = useRef(new Animated.Value(0)).current;
 
-    const ROTATE_DURATION = 600
-    const ROTATE_X_COEFF = 0.8
-    const ROTATE_Y_COEFF = 0.3
-    const TRANSLATE_DIST = 20
-
-    const fadeIn = () => {
-        for (let i = 0; i < fade.length; i++) {
-            const DELTA = 100
-            fade[i].setValue(0);
-            Animated.timing(fade[i], {
-                toValue: 1,
-                duration: 800-(i*DELTA),
-                easing: Easing.elastic(1),
-                useNativeDriver: true,
-                delay: ROTATE_DURATION+i*DELTA-200
-            }).start();
-        }
-    };
-
     const rotate = (
         value: Animated.ValueXY,
         toValue: any,
         duration: number = ROTATE_DURATION
     ) => {
-        Animated.timing(value, {
+        return Animated.timing(value, {
             toValue,
             duration,
-            easing: Easing.out(Easing.quad),
+            easing: Easing.elastic(0.8),
             useNativeDriver: true
-        }).start();
+        });
     };
 
     const sheenIn = () => {
         sheen.setValue(0);
-        Animated.timing(sheen, {
+        return Animated.timing(sheen, {
             toValue: 1,
             duration: 1200,
             useNativeDriver: true
-        }).start();
+        });
     };
 
     const animIn = () => {
-        fadeIn();
-        sheenIn();
-        rotate(rotation, { x: 0, y: 0 });
+        let fadeAnims = []
+        for (let i = 0; i < fade.length; i++) {
+            fade[i].setValue(0);
+            fadeAnims.push(Animated.timing(fade[i], {
+                toValue: 1,
+                duration: FADE_DURATION-(i*FADE_STAGGER),
+                easing: Easing.elastic(1),
+                useNativeDriver: true,
+                delay: ROTATE_DURATION+i*FADE_STAGGER-200
+            }));
+        }
+        Animated.parallel(fadeAnims).start();
+        sheenIn().start();
+        rotate(rotation, { x: 0, y: 0 }).start();
     };
 
     useEffect(() => {
@@ -78,14 +79,23 @@ export function BadgeComponent(props: BadgeComponentProps) {
 
     const panGesture = Gesture.Pan()
         .onUpdate((e) => {
-            const x = Math.sign(e.translationX)*(((Math.abs(ROTATE_X_COEFF*e.translationX)+90)%180)-90);
+            const x = ROTATE_X_COEFF*e.translationX;
             const shouldFlip = Math.floor((Math.abs(ROTATE_X_COEFF*e.translationX)+90) / 180)%2 ? 1 : -1;
             const y = shouldFlip*Math.sign(e.translationY)*Math.sqrt(Math.abs(ROTATE_Y_COEFF*e.translationY));
-            rotate(rotation, { x, y }, 0);
+            rotation.setValue({ x, y });
         })
-        .onEnd(() => {
-            rotate(rotation, { x: 0, y: 0 });
-            sheenIn();
+        .onEnd((e) => {
+            Animated.sequence([
+                Animated.decay(rotation, {
+                    velocity: { x: VELOCITY_X_COEFF*e.velocityX, y: 0 },
+                    deceleration: DECELERATION_X,
+                    useNativeDriver: true
+                }),
+                Animated.parallel([
+                    rotate(rotation, { x: 0, y: 0 }),
+                    sheenIn()
+                ])
+            ]).start();
         });
 
     const tapGesture = Gesture.Tap()
@@ -107,8 +117,8 @@ export function BadgeComponent(props: BadgeComponentProps) {
                 ...styles.container,
                 transform: [
                     {
-                        rotateY: rotation.x.interpolate({
-                            inputRange: [-90, 90],
+                        rotateY: Animated.modulo(Animated.add(rotation.x, 90), 180).interpolate({
+                            inputRange: [0, 180],
                             outputRange: ["-90deg", "90deg"]
                         })
                     },
@@ -157,8 +167,8 @@ export function BadgeComponent(props: BadgeComponentProps) {
                         <Animated.View style={{
                             transform: [
                                 {
-                                    translateX: rotation.x.interpolate({
-                                        inputRange: [-90, 90],
+                                    translateX: Animated.modulo(Animated.add(rotation.x, 90), 180).interpolate({
+                                        inputRange: [0, 180],
                                         outputRange: [200, -200]
                                     })
                                 },
@@ -181,8 +191,8 @@ export function BadgeComponent(props: BadgeComponentProps) {
                             zIndex: 2,
                             transform: [
                                 {
-                                    translateX: rotation.x.interpolate({
-                                        inputRange: [-90, 90],
+                                    translateX: Animated.modulo(Animated.add(rotation.x, 90), 180).interpolate({
+                                        inputRange: [0, 180],
                                         outputRange: [-80, 80]
                                     })
                                 },
