@@ -1,4 +1,4 @@
-import { View } from 'react-native'
+import { View } from "react-native"
 
 export type SquareIconProps = {
     size: number,

@@ -1,4 +1,4 @@
-import { StyleSheet, View, ViewProps, Text } from 'react-native';
+import { StyleSheet, View, ViewProps, Text } from "react-native";
 
 export type DoubleContainerProps = {
     leftText: string,
@@ -14,7 +14,7 @@ export function DoubleContainer(props: ViewProps & DoubleContainerProps) {
                 <Text style={{
                     ...styles.text,
                     color: props.rightColor,
-                    textAlign: 'left'
+                    textAlign: "left"
                 }}>
                     { props.leftText }
                 </Text>
@@ -25,7 +25,7 @@ export function DoubleContainer(props: ViewProps & DoubleContainerProps) {
                 <Text style={{
                     ...styles.text,
                     color: props.leftColor,
-                    textAlign: 'right'
+                    textAlign: "right"
                 }}>
                     { props.rightText }
                 </Text>
@@ -36,12 +36,12 @@ export function DoubleContainer(props: ViewProps & DoubleContainerProps) {
 
 const styles = StyleSheet.create({
     container: {
-        flexDirection: 'row'
+        flexDirection: "row"
     },
     subcontainer: {
         flex: 1,
-        justifyContent: 'center',
-        backgroundColor: 'red'
+        justifyContent: "center",
+        backgroundColor: "red"
     },
     leftTriangle: {
         width: 0,
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
         marginLeft: -StyleSheet.hairlineWidth,
         borderTopWidth: 20,
         borderRightWidth: 20,
-        borderRightColor: 'transparent'
+        borderRightColor: "transparent"
     },
     rightTriangle: {
         width: 0,
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
         marginLeft: -6,
         borderLeftWidth: 20,
         borderBottomWidth: 20,
-        borderLeftColor: 'transparent'
+        borderLeftColor: "transparent"
     },
     text: {
         marginLeft: 5,

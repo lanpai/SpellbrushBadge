@@ -1,5 +1,5 @@
-import { StyleSheet, ViewProps } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { StyleSheet, ViewProps } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 export type LinearBandProps = {
     color: string,
@@ -15,9 +15,9 @@ export function LinearBand(props: ViewProps & LinearBandProps) {
         <LinearGradient
             style={{ ...styles.container, ...props.style }}
             colors={[
-                '#fff0',
+                "#fff0",
                 props.color, props.color,
-                '#fff0'
+                "#fff0"
             ]}
             locations={[
                 props.start-blur, props.start,
@@ -31,7 +31,7 @@ export function LinearBand(props: ViewProps & LinearBandProps) {
 
 const styles = StyleSheet.create({
     container: {
-        position: 'absolute',
+        position: "absolute",
         left: 0,
         top: 0,
         right: 0,

@@ -1,10 +1,10 @@
-import { useRef, useEffect } from 'react';
-import { StyleSheet, Animated, Easing, View, Text, Image } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { StarIcon } from './StarIcon';
-import { DoubleContainer } from './DoubleContainer';
-import { SquareContainer } from './SquareContainer';
-import { LinearBand } from './LinearBand';
+import { useRef, useEffect } from "react";
+import { StyleSheet, Animated, Easing, View, Text, Image } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { StarIcon } from "./StarIcon";
+import { DoubleContainer } from "./DoubleContainer";
+import { SquareContainer } from "./SquareContainer";
+import { LinearBand } from "./LinearBand";
 
 export type BadgeComponentProps = {
     name: string;
@@ -109,13 +109,13 @@ export function BadgeComponent(props: BadgeComponentProps) {
                     {
                         rotateY: rotation.x.interpolate({
                             inputRange: [-90, 90],
-                            outputRange: ['-90deg', '90deg']
+                            outputRange: ["-90deg", "90deg"]
                         })
                     },
                     {
                         rotateX: rotation.y.interpolate({
                             inputRange: [-90, 90],
-                            outputRange: ['-90deg', '90deg']
+                            outputRange: ["-90deg", "90deg"]
                         })
                     }
                 ]
@@ -136,12 +136,12 @@ export function BadgeComponent(props: BadgeComponentProps) {
                         }]
                     }}
                 >
-                    <LinearBand color='#f5f5ff85' start={0.45} width={0.025} blur={0.05} />
+                    <LinearBand color="#f5f5ff85" start={0.45} width={0.025} blur={0.05} />
                 </Animated.View>
                 <Animated.View style={{ ...styles.background, opacity: fade[0] }}>
-                    <LinearBand style={{ borderRadius: 30 }} color='#03ffcc' start={0} width={0.2} />
-                    <LinearBand style={{ borderRadius: 30 }} color='#cbf7e8' start={0.22} width={0.05} />
-                    <LinearBand style={{ borderRadius: 30 }} color='#ee9afc' start={0.28} width={0.005} />
+                    <LinearBand style={{ borderRadius: 30 }} color="#03ffcc" start={0} width={0.2} />
+                    <LinearBand style={{ borderRadius: 30 }} color="#cbf7e8" start={0.22} width={0.05} />
+                    <LinearBand style={{ borderRadius: 30 }} color="#ee9afc" start={0.28} width={0.005} />
                 </Animated.View>
                 <Animated.View style={{
                     ...styles.iconContainer,
@@ -175,7 +175,7 @@ export function BadgeComponent(props: BadgeComponentProps) {
                     </View>
                     <Animated.View
                         style={{
-                            position: 'absolute',
+                            position: "absolute",
                             width: 258,
                             height: 258,
                             zIndex: 2,
@@ -280,45 +280,45 @@ const styles = StyleSheet.create({
         paddingTop: 60,
         paddingBottom: 50,
         flex: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: "center",
+        alignItems: "center",
         borderRadius: 30,
         elevation: 1,
-        backgroundColor: '#fff',
+        backgroundColor: "#fff",
     },
     background: {
-        position: 'absolute',
+        position: "absolute",
         top: 0,
         right: 0,
         bottom: 0,
         left: 0,
-        overflow: 'hidden'
+        overflow: "hidden"
     },
     iconContainer: {
         padding: 4,
         marginBottom: 32,
         borderRadius: 35,
-        backgroundColor: '#ee9afc'
+        backgroundColor: "#ee9afc"
     },
     parallaxContainer: {
         height: 250,
         aspectRatio: 1,
-        overflow: 'hidden',
+        overflow: "hidden",
         borderRadius: 31,
         borderWidth: 4,
-        borderColor: '#03ffcc',
-        backgroundColor: '#fff'
+        borderColor: "#03ffcc",
+        backgroundColor: "#fff"
     },
     elementColor: {
-        position: 'absolute',
+        position: "absolute",
         top: -10,
         right: -10,
         width: 60,
         height: 60,
         borderRadius: 10,
         borderWidth: 2,
-        borderColor: '#fff',
-        backgroundColor: '#fa8c73'
+        borderColor: "#fff",
+        backgroundColor: "#fa8c73"
     },
     icon: {
         height: 286,
@@ -327,30 +327,30 @@ const styles = StyleSheet.create({
         left: -20,
     },
     starContainer: {
-        position: 'absolute',
+        position: "absolute",
         left: 0,
         right: 0,
         bottom: -10,
-        flexDirection: 'row',
-        justifyContent: 'center'
+        flexDirection: "row",
+        justifyContent: "center"
     },
     subcontainer: {
         width: 250,
         marginVertical: 5,
-        flexDirection: 'row',
-        justifyContent: 'space-between'
+        flexDirection: "row",
+        justifyContent: "space-between"
     },
     text: {
-        fontWeight: 'bold'
+        fontWeight: "bold"
     },
     name: {
-        textAlign: 'center',
+        textAlign: "center",
         fontSize: 32,
-        fontWeight: 'bold'
+        fontWeight: "bold"
     },
     title: {
-        textAlign: 'center',
+        textAlign: "center",
         fontSize: 18,
-        fontWeight: 'bold'
+        fontWeight: "bold"
     }
 });

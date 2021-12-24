@@ -1,5 +1,5 @@
-import { StyleSheet, View, Text, TextProps } from 'react-native';
-import { SquareIcon } from './SquareIcon';
+import { StyleSheet, View, Text, TextProps } from "react-native";
+import { SquareIcon } from "./SquareIcon";
 
 export type SquareContainerProps = {
     color: string
@@ -16,12 +16,12 @@ export function SquareContainer(props: TextProps & SquareContainerProps) {
 
 const styles = StyleSheet.create({
     container: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center'
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center"
     },
     text: {
         marginLeft: 5,
-        fontWeight: 'bold'
+        fontWeight: "bold"
     }
 });
